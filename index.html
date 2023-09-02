@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- tailwind css and daisy ui cdn -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.6.4/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div class="fixed h-screen w-full bg-gray-800 bg-opacity-80 flex justify-center items-center z-50 gap-1" id="loading">
+        <span class="loading loading-bars text-primary loading-lg"></span>
+        <span class="loading loading-bars text-primary loading-lg"></span>
+        <span class="loading loading-bars text-primary loading-lg"></span>
+        <span class="loading loading-bars text-primary loading-lg"></span>
+    </div>
+    <div class="text-white px-5 py-10">
+        <header class="flex flex-col sm:flex-row justify-center items-center gap-2 text-2xl font-semibold mb-5">
+            <h1>Sort By: </h1>
+            <select class="select select-primary w-full max-w-xs" onchange="handleSort(this.value)">
+                <option disabled selected>Default</option>
+                <option value="firstName">Name</option>
+                <option value="username">Username</option>
+                <option value="ip">IP Address</option>
+                <option value="macAddress">MAC Address</option>
+                <option value="phone">Phone</option>
+                <option value="email">Email</option>
+            </select>
+        </header>
+        <main>    
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5" id="container">
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const loading = document.getElementById('loading');
+        loading.classList.add('hidden');
+        let usersData = [];
+
+        const loadData = async () => {
+            loading.classList.remove('hidden');
+            const res = await fetch(`https://dummyjson.com/users`);
+            const data = await res.json();
+            usersData = data.users;
+            renderUsers(usersData);
+        }
+
+        const renderUsers = (users) => {
+            loading.classList.remove('hidden');
+            container.innerHTML = '';
+            users.forEach(user => {
+                const fullName = `${user.firstName} ${user.maidenName || ''} ${user.lastName}`;
+                const card = document.createElement('div');
+                card.classList = `card card-compact border`;
+                card.innerHTML = `
+                <figure class="m-0 p-0 h-48"><img src=${user.image} alt="img" class="h-full"/></figure>
+                <div class="card-body">
+                    <h2 class="text-xl font-semibold">${fullName.slice(0,20)}</h2>
+                        <p><b>User name</b>: ${user.username}</p>
+                        <p><b>Phone</b>: ${user.phone}</p>
+                        <p><b>Email</b>: ${user.email}</p>
+                        <p><b>IP address</b>: ${user.ip}</p>
+                        <p><b>MAC address</b>: ${user.macAddress}</p>
+                    <div class="card-actions justify-end">
+                        <button class="btn btn-primary" onclick="my_modal_${user.id}.showModal()">Details</button>
+                        <dialog id="my_modal_${user.id}" class="modal">
+                            <form method="dialog" class="modal-box">
+                                <figure><img src=${user.image} alt="img" /></figure>
+                                <div class="card-body">
+                                    <h2 class="text-xl font-semibold">${fullName}</h2>
+                                    <p><b>User name</b>: ${user.username}</p>
+                                    <p><b>Address</b>: ${user?.address?.address} , ${user?.address?.state} , ${user?.address?.city} , Post: ${user.address.postalCode}</p>
+                                    <p><b>Address</b>: ( ${user.ip} -ip ) __ ( ${user.macAddress} -mac )</p>
+                                    <p><b>Gender</b>: ${user.gender} __ Age: ${user.age} __ <b>Blood group</b>: ${user.bloodGroup}</p>
+                                    <p><b>Height - Weight</b>: ${user.height} - ${user.weight} __ <b>Eye color</b>: ${user.eyeColor}</p>
+                                    <p><b>Email</b>: ${user.email} __ <b>Phone</b>: ${user.phone}</p>
+                                    <p><b>Password</b>: ${user.password} __ <b>EIN</b>: ${user.ein}</p>
+                                    <p><b>Domain</b>: ${user.domain}</p>
+                                    <p><b>User agent</b>: ${user.userAgent}</p>
+                                    <p><b>Company name</b>: ${user?.company?.name}</p>
+                                    <p><b>Company title</b>: ${user?.company?.title} __  <b>Department</b>: ${user?.company?.department ? user?.company?.department : ''}</p>
+                                    <p><b>Company address</b>: ${user?.company?.address?.address} , ${user?.company?.address?.state} , ${user?.company?.address?.city} , Post: ${user.address.postalCode}</p>
+                                    <p><b>University</b>: ${user.university}</p>
+                                </div>
+                                <div class="modal-action">
+                                    <button class="btn btn-primary">Close</button>
+                                </div>
+                            </form>
+                        </dialog>
+                    </div>
+                </div>
+                `;
+                container.appendChild(card);
+                loading.classList.add('hidden');
+            });
+        }
+        const handleSort = (sortType) => {
+            const sortedUsers = [...usersData];
+
+            switch (sortType) {
+                case "firstName":
+                    sortedUsers.sort((a, b) => a.firstName.localeCompare(b.firstName));
+                    break;
+                case "username":
+                    sortedUsers.sort((a, b) => a.username.localeCompare(b.username));
+                    break;
+                case "ip":
+                    sortedUsers.sort((a, b) => a.ip.localeCompare(b.ip));
+                    break;
+                case "macAddress":
+                    sortedUsers.sort((a, b) => a.macAddress.localeCompare(b.macAddress));
+                    break;
+                case "phone":
+                    sortedUsers.sort((a, b) => a.phone.localeCompare(b.phone));
+                    break;
+                case "email":
+                    sortedUsers.sort((a, b) => a.email.localeCompare(b.email));
+                    break;
+                default:
+                    // Default to sorting by first name if no valid sortType is selected
+                    sortedUsers.sort((a, b) => a.firstName.localeCompare(b.firstName));
+                    break;
+            }
+
+            renderUsers(sortedUsers);
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
